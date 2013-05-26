@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Budget App</title>
+		<link rel="stylesheet" href="page.css" />
+	</head>
+
+	<body>
+		<div class="page">
+			<div class="income box">
+				<h2>Paychecks</h2>
+				<input id="enterAmount" value="Add paycheck amount" onclick="clearValue(this);" ondrop="event.preventDefault();" />
+				<button id="submitAmount" onclick="addAmount();">Enter</button>
+				<button id="wipePaychecks" onclick="money.wipe();">Reset</button>
+
+				<div id="paychecks" class="paychecks"></div>
+			</div>
+			
+			<div class="bills box">
+				<h2>Bills</h2>
+
+				<div id="bills" class="bills">
+					<div class="bill grey" draggable="true" ondragstart="getAmount(this);" data-amount="300.50">$300.50</div>
+				</div>
+			</div>
+			
+			<div class="clear"></div>
+		</div>
+
+		<script src="budget.js"></script>
+		<script>
+			var money = new Income();
+		</script>
+	</body>
+</html>
