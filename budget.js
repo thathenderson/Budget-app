@@ -1,12 +1,20 @@
 //Budget App - Michael Henderson
-function Income() {}
+function Income() {
+	this.defaultPaycheckText = 'Add Income';
+	this.defaultBillText = 'Add a Bill';
+}
 
-Income.prototype.wipe = function() {
-	resetValue(document.getElementById('enterAmount'));
+Income.prototype.wipePaychecks = function() {
+	resetValue(document.getElementById('enterAmount'),this.defaultPaycheckText);
 	document.getElementById('paychecks').innerHTML = '';
 };
 
-Income.prototype.addPaycheck = function(a,i) {
+Income.prototype.wipeBills = function() {
+	resetValue(document.getElementById('enterBill'),this.defaultBillText);
+	document.getElementById('bills').innerHTML = '';
+};
+
+Income.prototype.createPaycheck = function(a,i) {
 	var paycheck = 'paycheck'+i;
 
 	this[paycheck] = {};
@@ -15,7 +23,7 @@ Income.prototype.addPaycheck = function(a,i) {
 	this[paycheck].afterBills = parseFloat(a);
 };
 
-function addAmount() {
+function displayPaycheck() {
 	var props = {
 		class:'paycheck green', 
 		draggable:'true', 
@@ -28,10 +36,41 @@ function addAmount() {
 	var match = /^(?=\.*\d)\d{0,6}\.\d{2}$/g;
 
 	if (match.test(input.value) == true) {
-		money.addPaycheck(input.value,len);
+		money.createPaycheck(input.value,len);
 		props.id = 'paycheck'+(len);
 		createElement('div','paychecks','$'+money['paycheck'+len].amount,props);
-		resetValue(input);
+		createElement('div','paycheck'+len,'-',{
+			class: 'delete hide', 
+			onclick: 'deleteElement("paychecks","paycheck'+len+'");'
+		});
+
+		resetValue(input,money.defaultPaycheckText);
+	} else {
+		return false;
+	}
+}
+
+function displayBill() {
+	var props = {
+		class:'bill grey', 
+		draggable:'true', 
+		ondragstart: 'getAmount(this);' 
+	}
+
+	var input = document.getElementById('enterBill');
+	var len = document.getElementById('bills').children.length+1;
+	var match = /^(?=\.*\d)\d{0,6}\.\d{2}$/g;
+
+	if (match.test(input.value) == true) {
+		props.id = 'bill'+(len);
+		props['data-amount'] = input.value;
+		createElement('div','bills','$'+props['data-amount'],props);
+		createElement('div','bill'+len,'-',{
+			class: 'delete hide', 
+			onclick: 'deleteElement("bills","bill'+len+'");'
+		});
+
+		resetValue(input,money.defaultBillText);
 	} else {
 		return false;
 	}
@@ -71,8 +110,8 @@ function clearValue(element) {
 	element.value = '';
 }
 
-function resetValue(element) {
-	element.value = 'Add paycheck amount';
+function resetValue(element,val) {
+	element.value = val;
 }
 
 function createElement(el,parent,str,props) {
@@ -85,4 +124,38 @@ function createElement(el,parent,str,props) {
 
 	element.appendChild(text);
 	document.getElementById(parent).appendChild(element);
+}
+
+function deleteElement(parent,id) {
+	var parent = document.getElementById(parent);
+	var element = document.getElementById(id);
+
+	parent.removeChild(element);
+}
+
+function editElements(t,element) {
+	var parent = document.getElementById(element);
+	var buttonClass = t.getAttribute("class");
+	
+	if (parent.children.length < 1 && buttonClass == 'button') {
+		return false;
+	} else if (parent.children.length > 0 && buttonClass == 'button') {
+	//not in edit mode
+		t.setAttribute("class",buttonClass+" editing");
+		t.innerHTML = 'Done';
+
+		for (var i=0; i < parent.children.length; i++) {
+			var deleteButton = parent.children[i].children[0];
+			deleteButton.setAttribute("class",deleteButton.getAttribute("class").replace("hide","show"));
+		}
+	} else if (buttonClass != 'button') {
+	//already in edit mode
+		t.setAttribute("class","button");
+		t.innerHTML = 'Edit';
+
+		for (var i=0; i < parent.children.length; i++) {
+			var deleteButton = parent.children[i].children[0];
+			deleteButton.setAttribute("class",deleteButton.getAttribute("class").replace("show","hide"));
+		}
+	}
 }
